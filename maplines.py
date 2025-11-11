@@ -11,5 +11,3 @@ if __name__ == "__main__":
         old_lines = f.readlines()
     with open(args.new_file, encoding="utf-8", errors="ignore") as f:
         new_lines = f.readlines()
-
-    print("done")
