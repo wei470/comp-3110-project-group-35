@@ -22,6 +22,18 @@ def simhash64(s: str) -> int:
 def hamming(a: int, b: int) -> int:
     return (a ^ b).bit_count()
 
+# how many steps to turn string a to b using edit/delete/subsitute letter
+# using dynamic programming
+# idea: Levenshtein distance
+def edit_distance(a: str, b: str) -> int:
+    la, lb = len(a), len(b)
+    dp = list(range(lb+1))
+    for i in range(1, la+1):
+        prev, dp[0] = dp[0], i
+        for j in range(1, lb+1):
+            prev, dp[j] = dp[j], min(prev + (a[i-1] != b[j-1]), dp[j] + 1, dp[j-1] + 1)
+    return dp[lb]
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("old_file")
