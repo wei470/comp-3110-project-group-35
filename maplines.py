@@ -9,6 +9,19 @@ def normalize_line(s: str) -> str:
 def token_iter(s: str):
     return re.findall(r"[A-Za-z0-9_]+", s.lower())
 
+# convert string into 64-bit SimHash
+def simhash64(s: str) -> int:
+    v = [0]*64
+    for tok in token_iter(s):
+        h = int(hashlib.blake2b(tok.encode(), digest_size=8).hexdigest(), 16)
+        for i in range(64):
+            v[i] += 1 if (h >> i) & 1 else -1
+    return sum((1 << i) for i, val in enumerate(v) if val >= 0)
+
+# compare 64-bit SimHash of 2 strings
+def hamming(a: int, b: int) -> int:
+    return (a ^ b).bit_count()
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("old_file")
