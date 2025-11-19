@@ -1,4 +1,9 @@
 import argparse
+import re, json, argparse, difflib, math, hashlib
+
+# remove extra space
+def normalize_line(s: str) -> str:
+    return re.sub(r"\s+", " ", s.strip())
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
@@ -11,3 +16,5 @@ if __name__ == "__main__":
         old_lines = f.readlines()
     with open(args.new_file, encoding="utf-8", errors="ignore") as f:
         new_lines = f.readlines()
+
+        
