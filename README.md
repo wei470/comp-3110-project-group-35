@@ -14,3 +14,6 @@ git status
 git add "what file to add"
 git commit -m "what is the comment"
 git push
+
+clone file: 
+git clone https://github.com/wei470/comp-3110-project-group-35.git
