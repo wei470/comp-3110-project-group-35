@@ -72,6 +72,25 @@ def cosine_sim(c1: Counter, c2: Counter) -> float:
     n2 = math.sqrt(sum(v*v for v in c2.values()))
     return dot / (n1 * n2) if n1 and n2 else 0.0
 
+# merge i+windows lines and i-windows lines into one line
+# ie
+#lines = 
+#    "int a = 0;",
+#    "a += 1;",
+#    "return a;",
+#    "}",
+#    "// end"
+#
+
+# bow_context(lines, i=2, window=2)
+# i = 2 -> lines 2 -> int a = 0;
+# sinces windows = 2, merge i = [0 ~ 4 into one line]
+# return "int a = 0; a +=1; } // end"
+
+def bow_context(lines, i, window):
+    L, R = max(0, i - window), min(len(lines)-1, i + window)
+    return " ".join(lines[L:i] + lines[i+1:R+1])
+
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
