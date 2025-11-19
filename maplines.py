@@ -5,6 +5,10 @@ import re, json, argparse, difflib, math, hashlib
 def normalize_line(s: str) -> str:
     return re.sub(r"\s+", " ", s.strip())
 
+#lower case all letter
+def token_iter(s: str):
+    return re.findall(r"[A-Za-z0-9_]+", s.lower())
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("old_file")
