@@ -1,5 +1,6 @@
 import argparse
 import re, json, argparse, difflib, math, hashlib
+from collections import Counter
 
 # remove extra space
 def normalize_line(s: str) -> str:
@@ -44,6 +45,32 @@ def edit_sim(a: str, b: str) -> float:
         return 1.0
     else:
         return 1 - edit_distance(a, b) / max(1, max(len(a), len(b)))
+
+# Compare the bag-of-words similarity between the two passages in the "near context".
+# dot = for each element c1' in c1 and each element c2', c1'*c2' iff c1=c2
+# ie: 
+#   c1 = Counter(["def", "add", "x", "y", "return", "x", "y"])
+#   c2 = Counter(["def", "sum", "a", "b", "return", "a", "b"])
+# same element in both c1 and c2: "def" , "return", they all showed once in c1 and c2
+# dot = 1+1 = 2
+# n1 = sqrt (each element in c1 * # of occurence of this element)
+
+# ie
+# c1 = {"def":1, "add":1, "x":2, "y":2, "return":1}
+# n1 = sqrt(1^2 + 1^2 + 2^2 + 2^2 + 1^2) = sqrt(11)
+# c2 = {"def":1, "sum":1, "a":2, "b":2, "return":1}
+# n1 = sqrt(11)
+
+# return "cosine" =  dot / (n1 * n2)
+# 
+# 0 -> two string are not the same at all
+# 1 -> two string are identital or one of them or both are empty string
+
+def cosine_sim(c1: Counter, c2: Counter) -> float:
+    dot = sum(c1[k] * c2[k] for k in c1 if k in c2)
+    n1 = math.sqrt(sum(v*v for v in c1.values()))
+    n2 = math.sqrt(sum(v*v for v in c2.values()))
+    return dot / (n1 * n2) if n1 and n2 else 0.0
 
 
 if __name__ == "__main__":
