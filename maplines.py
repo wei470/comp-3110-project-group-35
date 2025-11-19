@@ -34,6 +34,18 @@ def edit_distance(a: str, b: str) -> int:
             prev, dp[j] = dp[j], min(prev + (a[i-1] != b[j-1]), dp[j] + 1, dp[j-1] + 1)
     return dp[lb]
 
+# similarly of two string
+# 0 -> two string are not the same at all
+# 1 -> two string are identital or one of them or both are empty string
+def edit_sim(a: str, b: str) -> float:
+    if a == b:
+        return 1.0
+    elif not a and not b:
+        return 1.0
+    else:
+        return 1 - edit_distance(a, b) / max(1, max(len(a), len(b)))
+
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("old_file")
