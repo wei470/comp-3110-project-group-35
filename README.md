@@ -17,3 +17,11 @@ git push
 
 clone file: 
 git clone https://github.com/wei470/comp-3110-project-group-35.git
+
+push file for Ihdiff:
+git switch main          
+git pull --rebase origin main
+git status
+git add "maplines.py"
+git commit -m "key feature Ihdiff update: step "
+git push
