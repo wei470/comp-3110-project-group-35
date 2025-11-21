@@ -268,6 +268,7 @@ def lhdiff(old_lines, new_lines):
         cand_spans = [(lo, hi) for (lo, hi) in cand_spans if 0 <= lo <= hi < N]
         cand_spans.sort()
 
+        # step 4: For each old[i]，select best cand_spans with highest score 
         # convert [old[i] - windows - old[i] + windows] line into Counter
         bow_src = Counter(token_iter(old_ctx[oi]))
         
@@ -290,7 +291,7 @@ def lhdiff(old_lines, new_lines):
             if score > best_score:
                 best_score = score 
                 best_span = (lo, hi)
-                
+
         # for each old[i]，compare every pair in cand_span to find score = 0.6 * content_s + 0.4 * ctx_s
         # find best_span with biggest span_score
         if best_span and best_score >= Tmid:
