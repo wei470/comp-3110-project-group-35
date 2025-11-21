@@ -95,7 +95,7 @@ def bow_context(lines, i, window):
 def lhdiff(old_lines, new_lines):
     
     #step 1: normalize all input files
-    _norm = [normalize_line(x) for x in old_lines]
+    old_norm = [normalize_line(x) for x in old_lines]
     new_norm = [normalize_line(x) for x in new_lines]
 
 if __name__ == "__main__":
