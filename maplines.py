@@ -94,7 +94,8 @@ def bow_context(lines, i, window):
 # main process
 def lhdiff(old_lines, new_lines):
     
-    #step 1: normalize all input files
+    # step 1: normalize all input files
+    # ppt 20
     old_norm = [normalize_line(x) for x in old_lines]
     new_norm = [normalize_line(x) for x in new_lines]
 
