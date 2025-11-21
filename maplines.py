@@ -91,6 +91,12 @@ def bow_context(lines, i, window):
     L, R = max(0, i - window), min(len(lines)-1, i + window)
     return " ".join(lines[L:i] + lines[i+1:R+1])
 
+# main process
+def lhdiff(old_lines, new_lines):
+    
+    #step 1: normalize all input files
+    _norm = [normalize_line(x) for x in old_lines]
+    new_norm = [normalize_line(x) for x in new_lines]
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
