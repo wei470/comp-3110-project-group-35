@@ -99,6 +99,35 @@ def lhdiff(old_lines, new_lines):
     old_norm = [normalize_line(x) for x in old_lines]
     new_norm = [normalize_line(x) for x in new_lines]
 
+    # step 2: Detect Unchanged Lines
+    # pg 26-27
+
+    # anchors: record # line of old_line → # line of [new_line] where old_line = new_line
+    # ie:
+    # old_norm = [
+    # "int a = 1;",      # 0
+    # "int b = 2;",      # 1
+    # "return a + b;",   # 2
+    # ]
+
+    # new_norm = [
+    # "int a = 1;",      # 0
+    # "int b = 3;",      # 1  （changed）
+    # "return a + b;",   # 2
+
+    # sm =
+    # ("equal",   0, 1,   0, 1),   # old[0] == new[0]
+    # ("replace", 1, 2,   1, 2),   # old[1] != new[1]
+    # ("equal",   2, 3,   2, 3),   # old[2] == new[2]
+
+    # anchors =
+    # 0: [0],   # old[1] = new[0]
+    # 2: [2],    # old[2] = new[2]
+
+    sm = difflib.SequenceMatcher(a=old_norm, b=new_norm, autojunk=False)
+    anchors = {i: [j] for tag, i1, i2, j1, j2 in sm.get_opcodes()
+               if tag == "equal" for i, j in zip(range(i1, i2), range(j1, j2))}
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("old_file")
