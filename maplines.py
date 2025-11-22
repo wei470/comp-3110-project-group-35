@@ -355,14 +355,29 @@ def lhdiff(old_lines, new_lines, k, Thigh, Tmid, window, maxspan=2):
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
+
+    # name of two files to compare
+    ap.add_argument("file_1", nargs="?", default="old.txt")
+    ap.add_argument("file_2", nargs="?", default="new.txt")
+
+    
+    # deafult k = 10, thigh = 0.85, Tmid = 0.65, window = 4, maxspan = 2
+    ap.add_argument("-o", "--output", default="mapping.json")
+    ap.add_argument("--k", type=int, default=10)
+    ap.add_argument("--Thigh", type=float, default=0.85)
+    ap.add_argument("--Tmid", type=float, default=0.65)
+    ap.add_argument("--window", type=int, default=4)
+    ap.add_argument("--maxspan", type=int, default=2)
+
     args = ap.parse_args()
-    
-    with open("old.txt", encoding="utf-8", errors="ignore") as f:
+
+    with open(args.file_1, encoding="utf-8", errors="ignore") as f:
         old_lines = f.readlines()
-    with open("new.txt", encoding="utf-8", errors="ignore") as f:
+    with open(args.file_2, encoding="utf-8", errors="ignore") as f:
         new_lines = f.readlines()
-    
-    result = lhdiff(old_lines, new_lines, 10, 0.85, 0.65, 4, 3)
+
+    result = lhdiff(old_lines, new_lines, args.k, args.Thigh, args.Tmid, args.window, args.maxspan)
+
     
     # header print old and new file total lines
     header = (
@@ -391,6 +406,8 @@ if __name__ == "__main__":
     tail = '\n  ]\n}\n'
     final_text = header + body + tail
 
+    print("done, information mapped to mapping.json")
+
     # ie 
     # old file
     # FileReader fr = new FileReader(path);
@@ -414,6 +431,6 @@ if __name__ == "__main__":
     # { "old_line": 1, "new_lines": [1], "type": "unchanged", "note": "" },
     # { "old_line": 2, "new_lines": [2, 3], "type": "unchanged", "note": "split into 2 lines" },
     # { "old_line": 3, "new_lines": [4], "type": "unchanged", "note": "" }
-    
+
     with open("mapping.json", "w", encoding="utf-8") as f:
         f.write(final_text)
