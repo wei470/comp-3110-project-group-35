@@ -12,6 +12,8 @@ git switch main
 git pull --rebase origin main
 git status
 git add "what file to add"
+git add "what file to add"
+git add "what file to add"
 git commit -m "what is the comment"
 git push
 
