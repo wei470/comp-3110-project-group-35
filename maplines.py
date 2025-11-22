@@ -298,6 +298,60 @@ def lhdiff(old_lines, new_lines):
             lo, hi = best_span
             mapping[oi] = list(range(lo, hi + 1))
 
+    # step 5: DeTect LINE SPLIT, output result
+    result = []
+    for oi in range(len(old_norm)):
+
+        # assign each old_line[i] 
+        # 1.map to empty as default
+        # 2.type = deleted as default
+        # 3.note = []
+
+        entry = {"old_line": oi + 1, "new_lines": [], "type": "deleted", "note": ""}
+        
+        if oi in mapping:
+            
+            # ie 
+            # mapping = {
+            # 0: [0],
+            # 1: [1, 2],
+            # 2: [3]
+            # }
+            # oi = 1 -> njs = [1,2]
+
+            njs = sorted(mapping[oi])
+
+            # "new_lines" = [2,3]
+            entry["new_lines"] = [j + 1 for j in njs]
+
+            # recreate string base on index[2] + index[3]
+            # ie: return x;
+            joined_new = " ".join(new_norm[j] for j in njs)
+
+            # old[i] = join_new -> old[i] is not changed
+            # otherwise is modified 
+            # score >= Tmid
+            entry["type"] = "unchanged" if old_norm[oi] == joined_new else "modified"
+            
+            # determine split iff |njs| >= 2
+            if len(njs) >= 2:
+                entry["note"] = f"split into {len(njs)} lines"
+        result.append(entry)
+
+    # ie for old[1] where old[1] -> [1,2]
+    # entry for old[1]
+    # {
+    # "old_line": 2,
+    # "new_lines": [2, 3],
+    # "type": "unchanged", (or "modified")
+    # "note": "split into 2 lines"
+    # }
+
+    return {
+        "old_file_total_lines": len(old_norm),
+        "new_file_total_lines": len(new_norm),
+        "mapping": result
+    }
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
