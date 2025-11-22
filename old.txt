@@ -1,6 +1,3 @@
+FileReader fr = new FileReader(path);
 public void fileReader(String path){
 FileReader fr = new FileReader(path);
-LineReader r = new LineReader(fr);
-doWork(r);
-}
-fr.close();

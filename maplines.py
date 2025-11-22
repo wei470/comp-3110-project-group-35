@@ -97,7 +97,7 @@ def bow_context(lines, i, window):
     return " ".join(lines[L:i] + lines[i+1:R+1])
     
 # main process
-def lhdiff(old_lines, new_lines):
+def lhdiff(old_lines, new_lines, k, Thigh, Tmid, window, maxspan=2):
     
     # step 1: normalize all input files
     # ppt 20
@@ -135,8 +135,8 @@ def lhdiff(old_lines, new_lines):
 
     # Step 3: 预处理上下文/SimHash/BOW
     # 假设只上下两行 windows = 2
-    old_ctx = [bow_context(old_norm, i, windows) for i in range(len(old_norm))]
-    new_ctx = [bow_context(new_norm, i, windows) for i in range(len(new_norm))]
+    old_ctx = [bow_context(old_norm, i, window) for i in range(len(old_norm))]
+    new_ctx = [bow_context(new_norm, i, window) for i in range(len(new_norm))]
     
     # convert into simhash64 map
     # ie
@@ -355,14 +355,65 @@ def lhdiff(old_lines, new_lines):
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("old_file")
-    ap.add_argument("new_file")
-    ap.add_argument("-o", "--output", default="mapping.json")
     args = ap.parse_args()
     
-    with open(args.old_file, encoding="utf-8", errors="ignore") as f:
+    with open("old.txt", encoding="utf-8", errors="ignore") as f:
         old_lines = f.readlines()
-    with open(args.new_file, encoding="utf-8", errors="ignore") as f:
+    with open("new.txt", encoding="utf-8", errors="ignore") as f:
         new_lines = f.readlines()
+    
+    result = lhdiff(old_lines, new_lines, 10, 0.85, 0.65, 4, 3)
+    
+    # header print old and new file total lines
+    header = (
+        '{\n'
+        f'  "old_file_total_lines": {result["old_file_total_lines"]},\n'
+        f'  "new_file_total_lines": {result["new_file_total_lines"]},\n'
+        '  "mapping": [\n'
+    )
 
-        
+    # print old -> new mapping into lines[]
+    # includes type + note
+    lines = []
+    for e in result["mapping"]:
+        line = (
+            '    { '
+            f'"old_line": {e["old_line"]}, '
+            f'"new_lines": {json.dumps(e["new_lines"], ensure_ascii=False)}, '
+            f'"type": {json.dumps(e["type"], ensure_ascii=False)}, '
+            f'"note": {json.dumps(e["note"], ensure_ascii=False)} '
+            '}'
+        )
+        lines.append(line)
+    
+    # formating
+    body = ",\n".join(lines)
+    tail = '\n  ]\n}\n'
+    final_text = header + body + tail
+
+    # ie 
+    # old file
+    # FileReader fr = new FileReader(path);
+    # FileReader fr = new FileReader(path);
+    # public void fileReader(String path){
+    # FileReader fr = new FileReader(path);
+    # FileReader fr = new FileReader(path);
+
+    # new file
+    # FileReader fr = new FileReader(path);
+    # FileReader fr = new FileReader(path);
+    # public void fileReader(String path){
+    # FileReader fr = new FileReader(path);
+    # FileReader fr = new FileReader(path);
+
+    # mapping.json
+    #{
+    # /* header part */
+    
+    # "mapping": [
+    # { "old_line": 1, "new_lines": [1], "type": "unchanged", "note": "" },
+    # { "old_line": 2, "new_lines": [2, 3], "type": "unchanged", "note": "split into 2 lines" },
+    # { "old_line": 3, "new_lines": [4], "type": "unchanged", "note": "" }
+    
+    with open("mapping.json", "w", encoding="utf-8") as f:
+        f.write(final_text)
