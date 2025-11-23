@@ -7,6 +7,7 @@ import hashlib
 from collections import Counter
 
 # Global debugging switch: debugging information is not printed by default
+global DEBUG
 DEBUG = False
 
 def debug_print(*args, **kwargs):
@@ -379,7 +380,6 @@ if __name__ == "__main__":
     args = ap.parse_args()
 
     # Set global DEBUG variable based on command line parameters
-    global DEBUG
     DEBUG = args.debug
 
 
