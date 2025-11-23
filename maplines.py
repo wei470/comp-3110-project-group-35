@@ -136,260 +136,223 @@ def bow_context(lines, i, window):
     
 # main process
 def lhdiff(old_lines, new_lines, k, Thigh, Tmid, window, maxspan=2):
-    
-    # step 1: normalize all input files
-    # ppt 20
+  
+    # Standardization of lines (remove extra spaces, etc.)
     old_norm = [normalize_line(x) for x in old_lines]
     new_norm = [normalize_line(x) for x in new_lines]
 
-    # step 2: Detect Unchanged Lines
-    # pg 26-27
+    debug_print("===== Step 1: normalized lines =====")
+    for idx, line in enumerate(old_norm):
+        debug_print(f"[old_norm] line {idx}: {line!r}")
+    for idx, line in enumerate(new_norm):
+        debug_print(f"[new_norm] line {idx}: {line!r}")
 
-    # anchors: record # line of old_line → # line of [new_line] where old_line = new_line
-    # ie:
-    # old_norm = [
-    # "int a = 1;",      # 0
-    # "int b = 2;",      # 1
-    # "return a + b;",   # 2
-    # ]
-
-    # new_norm = [
-    # "int a = 1;",      # 0
-    # "int b = 3;",      # 1  （changed）
-    # "return a + b;",   # 2
-
-    # sm =
-    # ("equal",   0, 1,   0, 1),   # old[0] == new[0]
-    # ("replace", 1, 2,   1, 2),   # old[1] != new[1]
-    # ("equal",   2, 3,   2, 3),   # old[2] == new[2]
-
-    # anchors =
-    # 0: [0],   # old[1] = new[0]
-    # 2: [2],    # old[2] = new[2]
-
+    #Use difflib to find exactly the same line as an "anchor"
     sm = difflib.SequenceMatcher(a=old_norm, b=new_norm, autojunk=False)
-    anchors = {i: [j] for tag, i1, i2, j1, j2 in sm.get_opcodes()
-               if tag == "equal" for i, j in zip(range(i1, i2), range(j1, j2))}
+    anchors = {}
 
-    # Step 3: 预处理上下文/SimHash/BOW
-    # 假设只上下两行 windows = 2
-    old_ctx = [bow_context(old_norm, i, window) for i in range(len(old_norm))]
-    new_ctx = [bow_context(new_norm, i, window) for i in range(len(new_norm))]
-    
-    # convert into simhash64 map
-    # ie
-    # old_ctx[2] = "int b = 2; return sum;"
-    # new_ctx[2] = "int b = 3; return sum;"
-    # old_shctx[2] = 1010101011...
-    # new_shctx[2] = 1010110011...
-    # diff will be 3~4 bit
+    for tag, i1, i2, j1, j2 in sm.get_opcodes():
+        if tag != "equal":
+            continue
+       # Record each pair of identical rows: old_idx -> [new_idx]
+        for old_idx, new_idx in zip(range(i1, i2), range(j1, j2)):
+            anchors[old_idx] = [new_idx]
 
-    old_sh, new_sh = [simhash64(s) for s in old_norm], [simhash64(s) for s in new_norm]
-    old_shctx, new_shctx = [simhash64(s) for s in old_ctx], [simhash64(s) for s in new_ctx]
-    
-    # new_ctx[2] = "int b = 3; return sum;"
-    # -> new_bowctx = {
-    # {
-    # 'int': 1,
-    # 'b': 1,
-    # '3': 1,
-    # 'return': 1,
-    # 'sum': 1
-    # }
+    debug_print("===== Step 2: anchors (exact matches) =====")
+    debug_print(anchors)
 
-    new_bowctx = [Counter(token_iter(s)) for s in new_ctx]
+   # Preprocessing context, SimHash and bag-of-words
+    #Context: Center the current line, take the front and rear window lines, and concatenate them into a large string
+    old_ctx = []
+    for i in range(len(old_norm)):
+        ctx_str = bow_context(old_norm, i, window)
+        old_ctx.append(ctx_str)
 
-    
-    # merge (lo ~ hi) into one line
-    # ie
-    # 0: "int a = 1;"
-    # 1: "int b = 2;"
-    # 2: "int sum = a + b;"
-    # 3: "return sum;"
+    new_ctx = []
+    for i in range(len(new_norm)):
+        ctx_str = bow_context(new_norm, i, window)
+        new_ctx.append(ctx_str)
 
-    # span_text(2, 2) = "int sum = a + b;"
-    # span_text(1, 3) = "int b = 2; int sum = a + b; return sum;"
+    debug_print("===== Step 3: context strings around each line =====")
+    for idx, ctx in enumerate(old_ctx):
+        debug_print(f"[old_ctx] line {idx}: {ctx!r}")
+    for idx, ctx in enumerate(new_ctx):
+        debug_print(f"[new_ctx] line {idx}: {ctx!r}")
 
+    # Calculate the simhash of each row itself and the context
+    old_sh = []
+    old_shctx = []
+    for idx, line in enumerate(old_norm):
+        h_line = simhash64(line)
+        h_ctx = simhash64(old_ctx[idx])
+        old_sh.append(h_line)
+        old_shctx.append(h_ctx)
+        debug_print(f"[old_hash] line {idx}: line_hash={h_line:#018x}, ctx_hash={h_ctx:#018x}")
+
+    new_sh = []
+    new_shctx = []
+    for idx, line in enumerate(new_norm):
+        h_line = simhash64(line)
+        h_ctx = simhash64(new_ctx[idx])
+        new_sh.append(h_line)
+        new_shctx.append(h_ctx)
+        debug_print(f"[new_hash] line {idx}: line_hash={h_line:#018x}, ctx_hash={h_ctx:#018x}")
+
+    # Prepare bag-of-words Counter for the context of new
+    new_bowctx = []
+    for ctx in new_ctx:
+        c = Counter(token_iter(ctx))
+        new_bowctx.append(c)
+
+    debug_print("===== Step 3: new context bag-of-words =====")
+    for idx, c in enumerate(new_bowctx):
+        debug_print(f"[new_bowctx] line {idx}: {c}")
+
+    # Helper function
     def span_text(lo: int, hi: int) -> str:
-        return " ".join(new_norm[lo:hi+1])
-    
-    # add counter from (lo ~ hi)
-    # ie
-    # new_ctx[0] = "int b = 2;"
-    # new_ctx[1] = "int a = 1; int sum = a + b;"
-    # new_ctx[2] = "int b = 2; return sum;"
-   
-    # new_bowctx[0] = Counter({'int':1,'b':1,'=':1,'2':1})
-    # new_bowctx[1] = Counter({'int':2,'a':2,'sum':1,'=':1,'b':1})
-    # new_bowctx[2] = Counter({'int':1,'b':1,'return':1,'sum':1})
-
-    # span_ctx_counter(0, 0) = Counter({
-    #    'int':1, 
-    #    'b':1, 
-    #    '=':1, 
-    #    '2':1
-    # })
-
-    # span_ctx_counter(0, 2) = new_bowctx[0] + new_bowctx[1] + new_bowctx[2] = Counter({
-    #    'int': 1+2+1 = 4,
-    #    'b':   1+1+1 = 3,
-    #    'a':   0+2+0 = 2,
-    #    'sum': 0+1+1 = 2,
-    #    '=':   1+1+0 = 2,
-    #    'return': 1
-    # })
-    
+        return " ".join(new_norm[lo:hi + 1])
     def span_ctx_counter(lo: int, hi: int) -> Counter:
-        c = Counter()
-        for t in range(lo, hi+1):
-            c.update(new_bowctx[t])
-        return c
+       
+        combined = Counter()
+        for line_index in range(lo, hi + 1):
+            combined.update(new_bowctx[line_index])
+        return combined
 
     mapping = {}
     N = len(new_norm)
 
-    #如果这一行 old[i] 和 new[j] 是 difflib 找到的完全匹配，直接用，跳过 step-3。
-    #因为完全相同，不需要任何分析
-    for oi, line in enumerate(old_norm):
+    # For each line old[i], find the most suitable paragraph in new
+    for oi, old_line in enumerate(old_norm):
         if oi in anchors:
             mapping[oi] = anchors[oi]
+            debug_print(f"[mapping] old line {oi} is exact match -> new lines {anchors[oi]}")
             continue
 
-    # for each index oi in old
-    # search for each index oj in new, evaluate score
-    # find top "k" with largest score
+        # 1) First use simhash distance to roughly filter out the top-k candidate new lines
+        candidate_scores = []
+        for nj in range(N):
+           # Hamming distance of row content hash + context hash
+            line_dist = hamming(old_sh[oi], new_sh[nj])
+            ctx_dist = hamming(old_shctx[oi], new_shctx[nj])
+            total_dist = line_dist + ctx_dist
+            candidate_scores.append((nj, total_dist))
 
-    # ie |new| = 5
-    # in old[0]
-    # compare hashcode of old[0] and new[0...5]
-    # select top k smallest.
-    
-    # ie
-    # old_sh     = [12,  25,  59]  
-    # old_shctx  = [30,  44,  21]
-    # new_sh     = [20, 27, 60, 5]
-    # new_shctx  = [40, 45, 20, 3]
-    # 只有行内容 → 不够准确
-    # 行内容 + 上下文 → 才能找到真正对应的行
-    # result = [0, 1, 2, 3]
-    # result = [0, 1] (if k =2)
+        # The smaller the distance, the more similar they are. Here we sort them from small to large and take the top k
+        candidate_scores.sort(key=lambda pair: pair[1])
+        base_indices = [idx for (idx, dist) in candidate_scores[:k]]
 
-        base = sorted(
-            range(N),
-            key=lambda nj: hamming(old_sh[oi], new_sh[nj]) + hamming(old_shctx[oi], new_shctx[nj])
-        )[:k]
+        debug_print(f"[candidates] old line {oi}: base_indices={base_indices}")
 
-        # store a set of (lo,hi): (from lo to hi)
+        # 2) Using these new lines as centers, construct various possible spans (lengths from 1 to maxspan)
         cand_spans = set()
-
-        # ie 
-        # at old[0], |new| = 10，base= {0,7,9}，maxspan = 2
-        # span = 1: cand_spans = {(0,0), (7,7), (9,9)}
-        # span = 2: cand_spans = {
-        # (0,1), (-1,0)
-        # (7,8), (6,7), 
-        # (9,10), (8,9)}
-        # total = {(-1,0),(0,0),(0,1),(6,7),(7,7),(7,8),(8,9),(8,9),(9,9),(9,10)}
-
-        for j in base:
-            for span in range(1, maxspan + 1):
-                lo1, hi1 = j, min(N - 1, j + span - 1)
+        for j in base_indices:
+            for span_len in range(1, maxspan + 1):
+                # Right
+                lo1 = j
+                hi1 = min(N - 1, j + span_len - 1)
                 cand_spans.add((lo1, hi1))
-                
-                lo2, hi2 = max(0, j - (span - 1)), j
+
+                # Left
+                hi2 = j
+                lo2 = max(0, j - (span_len - 1))
                 cand_spans.add((lo2, hi2))
-        
-        # filer, makke sure 0 ≤ lo ≤ hi < N
-        # in example, the total has (-1,0), (9,10), which violate 0 ≤ lo and hi < N remove them from Canadidates
-        # cand_spans = {(0,0),(0,1),(6,7),(7,7),(7,8),(8,9),(8,9),(9,9)}
 
-        cand_spans = [(lo, hi) for (lo, hi) in cand_spans if 0 <= lo <= hi < N]
-        cand_spans.sort()
-
-        # step 4: For each old[i]，select best cand_spans with highest score 
-        # convert [old[i] - windows - old[i] + windows] line into Counter
-        bow_src = Counter(token_iter(old_ctx[oi]))
-        
-        best_score, best_span = -1.0, None
-        
-        # ie. cand_spans = {(0,0),(0,1),(6,7),(7,7),(7,8),(8,9),(8,9),(9,9)}
+        # Filter out out-of-bounds spans and sort them
+        valid_spans = []
         for (lo, hi) in cand_spans:
+            if 0 <= lo <= hi < N:
+                valid_spans.append((lo, hi))
+        valid_spans.sort()
+
+        debug_print(f"[cand_spans] old line {oi}: {valid_spans}")
+
+        # 3) Calculate the final score (combined similarity of content + context) for each candidate span
+        src_ctx_counter = Counter(token_iter(old_ctx[oi]))
+        best_score = -1.0
+        best_span = None
+
+        for (lo, hi) in valid_spans:
             new_text = span_text(lo, hi)
-
-            # line = old_norm[oi]
-            content_s = edit_sim(line, new_text)
-
-            #原old + windows 对比 cand_spans Counter的cosine value
-            ctx_s = cosine_sim(bow_src, span_ctx_counter(lo, hi))
-
-            # ppt #34 
+            content_s = edit_sim(old_line, new_text)
+            ctx_s = cosine_sim(src_ctx_counter, span_ctx_counter(lo, hi))
             score = 0.6 * content_s + 0.4 * ctx_s
-            
-            # record best span for each old[i]
+
+            debug_print(
+                f"[score] old line {oi}, span ({lo},{hi}): "
+                f"content_s={content_s:.4f}, ctx_s={ctx_s:.4f}, score={score:.4f}"
+            )
+
             if score > best_score:
-                best_score = score 
+                best_score = score
                 best_span = (lo, hi)
 
-        # for each old[i]，compare every pair in cand_span to find score = 0.6 * content_s + 0.4 * ctx_s
-        # find best_span with biggest span_score
-        if best_span and best_score >= Tmid:
+        # 4) If the best span score reaches the threshold, record it in mapping
+        if best_span is not None and best_score >= Tmid:
             lo, hi = best_span
             mapping[oi] = list(range(lo, hi + 1))
+            debug_print(
+                f"[mapping] old line {oi} best_span={best_span}, "
+                f"score={best_score:.4f}, mapped_to={mapping[oi]}"
+            )
+        else:
+            debug_print(
+                f"[mapping] old line {oi}: no suitable span found "
+                f"(best_score={best_score:.4f}, Tmid={Tmid})"
+            )
 
-    # step 5: DeTect LINE SPLIT, output result
+    #Generate the final result list and detect "multiple lines old -> single line new (merge)"
+    # Construct a reverse mapping: new rows -> which old rows are mapped
+    reverse_map = {}
+    for old_idx, new_list in mapping.items():
+        for nj in new_list:
+            reverse_map.setdefault(nj, []).append(old_idx)
+
+    debug_print("===== Step 5: reverse_map (new line -> list of old lines) =====")
+    debug_print(reverse_map)
+
     result = []
-    for oi in range(len(old_norm)):
+    old_total = len(old_norm)
+    new_total = len(new_norm)
 
-        # assign each old_line[i] 
-        # 1.map to empty as default
-        # 2.type = deleted as default
-        # 3.note = []
+    for oi in range(old_total):
+        entry = {
+            "old_line": oi + 1,
+            "new_lines": [],
+            "type": "deleted",
+            "note": ""
+        }
 
-        entry = {"old_line": oi + 1, "new_lines": [], "type": "deleted", "note": ""}
-        
         if oi in mapping:
-            
-            # ie 
-            # mapping = {
-            # 0: [0],
-            # 1: [1, 2],
-            # 2: [3]
-            # }
-            # oi = 1 -> njs = [1,2]
-
             njs = sorted(mapping[oi])
-
-            # "new_lines" = [2,3]
             entry["new_lines"] = [j + 1 for j in njs]
 
-            # recreate string base on index[2] + index[3]
-            # ie: return x;
+           # Put the corresponding new lines into one line, and then compare it with old_norm[oi]
             joined_new = " ".join(new_norm[j] for j in njs)
 
-            # old[i] = join_new -> old[i] is not changed
-            # otherwise is modified 
-            # score >= Tmid
-            entry["type"] = "unchanged" if old_norm[oi] == joined_new else "modified"
-            
-            # determine split iff |njs| >= 2
+            if old_norm[oi] == joined_new:
+                entry["type"] = "unchanged"
+            else:
+                entry["type"] = "modified"
+
+            # One line old is split into multiple lines new (split)
             if len(njs) >= 2:
                 entry["note"] = f"split into {len(njs)} lines"
+            # Handle the situation of "multiple lines old -> single line new" (merge)
+            elif len(njs) == 1:
+                nj = njs[0]
+                old_list_for_this_new = reverse_map.get(nj, [])
+                if len(old_list_for_this_new) >= 2:
+                    # Such as "merged with 2 other lines"
+                    entry["note"] = f"merged with {len(old_list_for_this_new) - 1} other lines"
+
         result.append(entry)
 
-    # ie for old[1] where old[1] -> [1,2]
-    # entry for old[1]
-    # {
-    # "old_line": 2,
-    # "new_lines": [2, 3],
-    # "type": "unchanged", (or "modified")
-    # "note": "split into 2 lines"
-    # }
-
     return {
-        "old_file_total_lines": len(old_norm),
-        "new_file_total_lines": len(new_norm),
+        "old_file_total_lines": old_total,
+        "new_file_total_lines": new_total,
         "mapping": result
     }
+
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
