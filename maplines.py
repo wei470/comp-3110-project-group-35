@@ -1,6 +1,18 @@
+import re
+import json
 import argparse
-import re, json, argparse, difflib, math, hashlib
+import difflib
+import math
+import hashlib
 from collections import Counter
+
+# Global debugging switch: debugging information is not printed by default
+DEBUG = False
+
+def debug_print(*args, **kwargs):
+   
+    if DEBUG:
+        print(*args, **kwargs)
 
 # remove extra space
 def normalize_line(s: str) -> str:
