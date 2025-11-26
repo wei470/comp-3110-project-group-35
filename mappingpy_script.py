@@ -3,7 +3,7 @@ import json
 from maplines import lhdiff
 
 DATASET_DIR = "evaluate_set"
-OUTPUT_DIR = "results"
+OUTPUT_DIR = "evaluate_set"
 
 # Default LHDiff parameters
 K = 10
