@@ -45,7 +45,7 @@ def compare(gt, mp):
 def main():
     print("pair, correct%, correct, change, spurious, eliminate")
 
-    for i in range(1, 26):
+    for i in range(1, 25):
         gt = load_gt(f"evaluate_set/pair{i}.txt")
         mp = load_mapping(f"evaluate_set/mapping_{i}.json")
 

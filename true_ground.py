@@ -34,7 +34,7 @@ def process_pair(idx):
     print("Generated:", out_f)
 
 def main():
-    for i in range(1, 24):
+    for i in range(1, 25):
         process_pair(i)
 
 main()
