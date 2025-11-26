@@ -1,0 +1,108 @@
+1 -> 1
+2 -> 2, 5, 11, 21  (duplicated)
+3 -> 3
+4 -> 2, 5, 11, 21  (duplicated)
+5 -> (deleted)
+6 -> 6
+7 -> 7
+8 -> 8
+9 -> 9
+10 -> 2, 5, 11, 21  (duplicated)
+11 -> 12
+12 -> 13
+13 -> 14
+14 -> 15
+15 -> 16
+16 -> 17
+17 -> 18
+18 -> 19
+19 -> 20
+20 -> 2, 5, 11, 21  (duplicated)
+21 -> 22
+22 -> 23
+23 -> 24
+24 -> 25, 29, 34, 51, 52, 61, 68, 92  (duplicated)
+25 -> 26
+26 -> 27
+27 -> 28
+28 -> 25, 29, 34, 51, 52, 61, 68, 92  (duplicated)
+29 -> 30
+30 -> 31
+31 -> 32
+32 -> (deleted)
+33 -> 25, 29, 34, 51, 52, 61, 68, 92  (duplicated)
+34 -> 35, 53  (duplicated)
+35 -> 36
+36 -> 37
+37 -> 38
+38 -> 39
+39 -> 40
+40 -> 41
+41 -> (deleted)
+42 -> 42, 57  (duplicated)
+43 -> 43
+44 -> 44
+45 -> 45
+46 -> (deleted)
+47 -> (deleted)
+48 -> 47
+49 -> 48
+50 -> (deleted)
+51 -> (deleted)
+52 -> 50, 60, 67, 75, 91  (duplicated)
+53 -> 25, 29, 34, 51, 52, 61, 68, 92  (duplicated)
+54 -> 25, 29, 34, 51, 52, 61, 68, 92  (duplicated)
+55 -> 35, 53  (duplicated)
+56 -> 54
+57 -> 55
+58 -> 56
+59 -> 42, 57  (duplicated)
+60 -> 58
+61 -> (deleted)
+62 -> 50, 60, 67, 75, 91  (duplicated)
+63 -> 25, 29, 34, 51, 52, 61, 68, 92  (duplicated)
+64 -> (deleted)
+65 -> (deleted)
+66 -> 50, 60, 67, 75, 91  (duplicated)
+67 -> 25, 29, 34, 51, 52, 61, 68, 92  (duplicated)
+68 -> (deleted)
+69 -> (deleted)
+70 -> (deleted)
+71 -> (deleted)
+72 -> (deleted)
+73 -> (deleted)
+74 -> (deleted)
+75 -> (deleted)
+76 -> (deleted)
+77 -> 88
+78 -> 74
+79 -> 50, 60, 67, 75, 91  (duplicated)
+80 -> 25, 29, 34, 51, 52, 61, 68, 92  (duplicated)
+81 -> (deleted)
+82 -> (deleted)
+83 -> (deleted)
+84 -> (deleted)
+85 -> (deleted)
+86 -> (deleted)
+87 -> (deleted)
+88 -> (deleted)
+89 -> (deleted)
+90 -> (deleted)
+91 -> 88
+92 -> (deleted)
+93 -> (deleted)
+94 -> (deleted)
+95 -> (deleted)
+96 -> (deleted)
+97 -> 88
+98 -> 74
+99 -> 50, 60, 67, 75, 91  (duplicated)
+100 -> 25, 29, 34, 51, 52, 61, 68, 92  (duplicated)
+101 -> 77
+102 -> 78
+103 -> (deleted)
+104 -> (deleted)
+105 -> (deleted)
+106 -> 50, 60, 67, 75, 91  (duplicated)
+107 -> 25, 29, 34, 51, 52, 61, 68, 92  (duplicated)
+108 -> 93

@@ -1,0 +1,46 @@
+1 -> 1
+2 -> 2
+3 -> 3
+4 -> 4, 6, 8, 12  (duplicated)
+5 -> (deleted)
+6 -> 4, 6, 8, 12  (duplicated)
+7 -> (deleted)
+8 -> 4, 6, 8, 12  (duplicated)
+9 -> (deleted)
+10 -> 4, 6, 8, 12  (duplicated)
+11 -> 9
+12 -> 11
+13 -> 4, 6, 8, 12  (duplicated)
+14 -> 13
+15 -> 14
+16 -> 15
+17 -> (deleted)
+18 -> (deleted)
+19 -> (deleted)
+20 -> 16
+21 -> 17
+22 -> (deleted)
+23 -> (deleted)
+24 -> (deleted)
+25 -> (deleted)
+26 -> 19
+27 -> 20
+28 -> 21
+29 -> 22
+30 -> 23
+31 -> 24
+32 -> 25
+33 -> 26
+34 -> 27
+35 -> 28
+36 -> (deleted)
+37 -> (deleted)
+38 -> (deleted)
+39 -> (deleted)
+40 -> (deleted)
+41 -> (deleted)
+42 -> (deleted)
+43 -> (deleted)
+44 -> (deleted)
+45 -> (deleted)
+46 -> (deleted)

@@ -17,3 +17,24 @@ public interface BaseTypes {
 	final BaseTypeBinding NullBinding = new BaseTypeBinding(TypeIds.T_null, "null"/*nonNLS*/.toCharArray(), new char[] {'N'}); //N stands for null even if it is never internally used
 	final BaseTypeBinding VoidBinding = new BaseTypeBinding(TypeIds.T_void, "void"/*nonNLS*/.toCharArray(), new char[] {'V'});
 }
+
+def square(n):
+    return n * n
+def generate_table():
+    table = []
+    for i in range(1, 21):
+        table.append((i, square(i)))
+    return table
+def print_table(table):
+    for n, sq in table:
+        print(f"{n} -> {sq}")
+def main():
+    table = generate_table()
+    print_table(table)
+if __name__ == "__main__":
+    main()
+# filler
+# filler
+# filler
+# filler
+# filler

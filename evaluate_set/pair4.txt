@@ -1,0 +1,35 @@
+1 -> 1
+2 -> 2
+3 -> 3
+4 -> 4
+5 -> 5
+6 -> 6
+7 -> 7, 20  (duplicated)
+8 -> 8
+9 -> (deleted)
+10 -> (deleted)
+11 -> (deleted)
+12 -> (deleted)
+13 -> (deleted)
+14 -> (deleted)
+15 -> (deleted)
+16 -> (deleted)
+17 -> (deleted)
+18 -> (deleted)
+19 -> 19
+20 -> 7, 20  (duplicated)
+21 -> (deleted)
+22 -> (deleted)
+23 -> 23
+24 -> 24
+25 -> (deleted)
+26 -> 26
+27 -> 27
+28 -> 28
+29 -> (deleted)
+30 -> 30
+31 -> (deleted)
+32 -> (deleted)
+33 -> 33
+34 -> (deleted)
+35 -> 35

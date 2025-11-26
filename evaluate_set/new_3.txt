@@ -12,3 +12,42 @@ public interface BaseTypes {
 	final BaseTypeBinding NullBinding = new BaseTypeBinding(TypeIds.T_null, "null"/*nonNLS*/.toCharArray(), new char[] {'N'}); //N stands for null even if it is never internally used
 	final BaseTypeBinding VoidBinding = new BaseTypeBinding(TypeIds.T_void, "void"/*nonNLS*/.toCharArray(), new char[] {'V'});
 }
+
+package org.eclipse.swt.graphics;
+
+/*
+ * Copyright (c) 2000, 2002 IBM Corp.  All rights reserved.
+ * This file is made available under the terms of the Common Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ */
+
+import org.eclipse.swt.internal.carbon.*;
+import org.eclipse.swt.*;
+
+/**
+ * Class <code>GC</code> is where all of the drawing capabilities that are 
+ * supported by SWT are located. Instances are used to draw on either an 
+ * <code>Image</code>, a <code>Control</code>, or directly on a <code>Display</code>.
+ * <p>
+ * Application code must explicitly invoke the <code>GC.dispose()</code> 
+ * method to release the operating system resources managed by each instance
+ * when those instances are no longer required. This is <em>particularly</em>
+ * important on Windows95 and Windows98 where the operating system has a limited
+ * number of device contexts available.
+ * </p>
+ *
+ * @see org.eclipse.swt.events.PaintEvent
+ */
+public final class GC {
+	/**
+	 * the handle to the OS device context
+	 * (Warning: This field is platform dependent)
+	 */
+	public int handle;
+	
+	Drawable drawable;
+	GCData data;
+
+GC() {
+}

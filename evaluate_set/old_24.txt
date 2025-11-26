@@ -10,3 +10,37 @@ public class asdf
 
     String s1;
 }
+
+import os
+def file_exists(path):
+    return os.path.exists(path)
+def check_files():
+    results = []
+    for i in range(1, 11):
+        name = f"file_{i}.txt"
+        exists = file_exists(name)
+        results.append((name, exists))
+    return results
+def write_summary(results):
+    with open("summary.txt", "w", encoding="utf-8") as f:
+        for name, exists in results:
+            status = "FOUND" if exists else "MISSING"
+            f.write(f"{name}: {status}\n")
+def print_summary():
+    with open("summary.txt", "r", encoding="utf-8") as f:
+        for line in f:
+            print(line.strip())
+def main():
+    results = check_files()
+    write_summary(results)
+    print_summary()
+if __name__ == "__main__":
+    main()
+# filler
+# filler
+# filler
+# filler
+# filler
+# filler
+# filler
+#

@@ -9,3 +9,20 @@ public class asdf
     String s1;
     String s2;
 }
+
+import os
+def file_exists(path):
+    return os.path.exists(path)
+        name = f"file_{i}.txt"
+        exists = file_exists(name)
+        results.append((name, exists)
+        for name, exists in results:
+            status = "FOUND" if exists else "MISSING"
+            f.write(f"{name}: {status}\n")
+def print_summary():
+    with open("summary.txt", "r", encoding="utf-8") as f:
+        for line in f:
+            print(line.strip())
+def main():
+    results = check_files()
+    write_summary(results)
