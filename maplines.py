@@ -17,7 +17,7 @@ def debug_print(*args, **kwargs):
 
 # remove extra space
 def normalize_line(s: str) -> str:
-    return re.sub(r"\s+", " ", s.strip())
+    return s.rstrip("\n")
 
 #lower case all letter
 def token_iter(s: str):
@@ -152,12 +152,12 @@ def lhdiff(old_lines, new_lines, k, Thigh, Tmid, window, maxspan=2):
     sm = difflib.SequenceMatcher(a=old_norm, b=new_norm, autojunk=False)
     anchors = {}
 
-    for tag, i1, i2, j1, j2 in sm.get_opcodes():
-        if tag != "equal":
-            continue
-       # Record each pair of identical rows: old_idx -> [new_idx]
-        for old_idx, new_idx in zip(range(i1, i2), range(j1, j2)):
-            anchors[old_idx] = [new_idx]
+    anchors = {}
+    for i, line_old in enumerate(old_norm):
+        for j, line_new in enumerate(new_norm):
+            if line_old == line_new:
+                anchors[i] = [j]
+                break  # one anchor
 
     debug_print("===== Step 2: anchors (exact matches) =====")
     debug_print(anchors)
@@ -232,16 +232,11 @@ def lhdiff(old_lines, new_lines, k, Thigh, Tmid, window, maxspan=2):
         # 1) First use simhash distance to roughly filter out the top-k candidate new lines
         candidate_scores = []
         for nj in range(N):
-           # Hamming distance of row content hash + context hash
-            line_dist = hamming(old_sh[oi], new_sh[nj])
-            ctx_dist = hamming(old_shctx[oi], new_shctx[nj])
-            total_dist = line_dist + ctx_dist
-            candidate_scores.append((nj, total_dist))
+            dist = hamming(old_sh[oi], new_sh[nj])
+            candidate_scores.append((nj, dist))
 
-        # The smaller the distance, the more similar they are. Here we sort them from small to large and take the top k
-        candidate_scores.sort(key=lambda pair: pair[1])
-        base_indices = [idx for (idx, dist) in candidate_scores[:k]]
-
+        candidate_scores.sort(key=lambda x: x[1])
+        base_indices = [pair[0] for pair in candidate_scores[:k]]
         debug_print(f"[candidates] old line {oi}: base_indices={base_indices}")
 
         # 2) Using these new lines as centers, construct various possible spans (lengths from 1 to maxspan)

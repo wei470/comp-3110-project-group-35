@@ -6,11 +6,11 @@ DATASET_DIR = "evaluate_set"
 OUTPUT_DIR = "evaluate_set"
 
 # Default LHDiff parameters
-K = 10
+K = 15
 Thigh = 0.85
-Tmid = 0.65
+Tmid = 0.85
 WINDOW = 4
-MAXSPAN = 2
+MAXSPAN = 3
 
 def format_result(result: dict) -> str:
 
