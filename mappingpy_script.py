@@ -14,30 +14,34 @@ MAXSPAN = 3
 
 def format_result(result: dict) -> str:
 
-    # header
-    header = (
-        '{\n'
-        f'  "old_file_total_lines": {result["old_file_total_lines"]},\n'
-        f'  "new_file_total_lines": {result["new_file_total_lines"]},\n'
-        '  "mapping": [\n'
+    # Prepare a new dictionary to save the content to be written into JSON
+    output = {}
+
+   
+    output["old_file_total_lines"] = result["old_file_total_lines"]
+    output["new_file_total_lines"] = result["new_file_total_lines"]
+
+    # "mapping" is a list, each item is a dictionary
+    mapping_list = []
+    for item in result["mapping"]:
+        one_mapping = {}
+        one_mapping["old_line"] = item["old_line"]
+        one_mapping["new_lines"] = item["new_lines"]
+        one_mapping["type"] = item["type"]
+        one_mapping["note"] = item["note"]
+        mapping_list.append(one_mapping)
+
+    output["mapping"] = mapping_list
+
+    # Convert the entire dictionary into a formatted JSON string
+    json_text = json.dumps(
+        output,
+        ensure_ascii=False,  # Keep non-ASCII characters
+        indent=2             # looks better
     )
 
-    lines = []
-    for e in result["mapping"]:
-        line = (
-            '    { '
-            f'"old_line": {e["old_line"]}, '
-            f'"new_lines": {json.dumps(e["new_lines"], ensure_ascii=False)}, '
-            f'"type": {json.dumps(e["type"], ensure_ascii=False)}, '
-            f'"note": {json.dumps(e["note"], ensure_ascii=False)} '
-            '}'
-        )
-        lines.append(line)
+    return json_text
 
-    body = ",\n".join(lines)
-    tail = '\n  ]\n}\n'
-
-    return header + body + tail
 
 
 def run_all():

@@ -107,11 +107,11 @@ def main():
         gt_dict = load_gt(gt_path)
         mapping_dict = load_mapping(mapping_path)
 
-        correct, change, spurious, eliminate = compare_mapping(gt_dict, mapping_dict)
+        correct, change, spurious, eliminate = compare(gt_dict, mapping_dict)
 
         total_lines = len(gt_dict)
 
-       # Prevent division by zero when total_lines is 0
+        # Prevent division by zero when total_lines is 0
         if total_lines == 0:
             correct_rate = 0.0
         else:
