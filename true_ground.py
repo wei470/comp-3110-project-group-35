@@ -16,16 +16,30 @@ def load_file(path):
 
 def generate_gt(old_lines, new_lines):
     mapping = []
-    for oi, line in enumerate(old_lines):
-        matches = [nj + 1 for nj, nl in enumerate(new_lines) if nl == line]
 
-        if not matches:
-            mapping.append(f"{oi+1} -> (deleted)")
-        elif len(matches) == 1:
-            mapping.append(f"{oi+1} -> {matches[0]}")
+    #old_index starts from 1, keeping the line number consistent with the line number in the text file
+    for old_index, old_line in enumerate(old_lines, start=1):
+        match_positions = []
+
+        #Find all lines in new_lines that are the same as old_line
+        for new_index, new_line in enumerate(new_lines, start=1):
+            if new_line == old_line:
+                match_positions.append(new_index)
+
+        #Generate different strings based on number of matches
+        if len(match_positions) == 0:
+            line_text = f"{old_index} -> (deleted)"
+        elif len(match_positions) == 1:
+            line_text = f"{old_index} -> {match_positions[0]}"
         else:
-            mapping.append(f"{oi+1} -> {', '.join(map(str, matches))}  (duplicated)")
+            #Spell multiple line numbers into the form "a, b, c"
+            joined = ", ".join(str(pos) for pos in match_positions)
+            line_text = f"{old_index} -> {joined}  (duplicated)"
+
+        mapping.append(line_text)
+
     return mapping
+
 
 def process_pair(idx):
     old_f = f"evaluate_set/old_{idx}.txt"
