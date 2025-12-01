@@ -52,8 +52,19 @@ def load_gt(path):
 def load_mapping(path):
     with open(path, "r", encoding="utf-8") as f:
         data = json.load(f)
-    mp = {e["old_line"]: e["new_lines"] for e in data["mapping"]}
-    return mp
+
+    result = {}
+
+   # data["mapping"] is a list, each item is a dictionary
+    for item in data["mapping"]:
+        old_line = item["old_line"]
+        new_lines = item["new_lines"]
+
+       # Assume the input is legal
+        result[old_line] = new_lines
+
+    return result
+
 
 def compare(gt, mp):
     correct = 0
