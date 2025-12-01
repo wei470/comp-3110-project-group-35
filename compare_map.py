@@ -1,17 +1,53 @@
 import json
 
 def load_gt(path):
+    """
+   Read the ground truth file (pairX.txt),
+    Returns a dictionary: key is the old line number, value is the corresponding new line number list.
+    For example:
+      1 -> 2           => {1: [2]}
+      2 -> (deleted)   => {2: []}
+      3 -> 4, 5        => {3: [4, 5]}
+    """
     gt = {}
+
     with open(path, "r", encoding="utf-8") as f:
-        for line in f:
-            old, right = line.strip().split(" -> ")
-            old = int(old)
-            if right == "(deleted)":
-                gt[old] = []
+        for raw_line in f:
+            line = raw_line.strip()
+            if not line:
+                # Blank lines are skipped directly (although they are generally not included in normal input)
+                continue
+
+            left_and_right = line.split(" -> ")
+            if len(left_and_right) != 2:
+               # If the format is wrong, skip it first so that the program will not crash directly.
+                # It can also be changed to raise Exception
+                continue
+
+            old_str, right_str = left_and_right
+            old_line_no = int(old_str)
+
+            if right_str == "(deleted)":
+               # Marked for deletion, corresponding to the empty list
+                gt[old_line_no] = []
             else:
-                nums = [int(x) for x in right.replace("(duplicated)", "").split(",")]
-                gt[old] = nums
+                # Remove possible "(duplicated)" tags
+                cleaned = right_str.replace("(duplicated)", "")
+
+                # Split with commas
+                pieces = cleaned.split(",")
+
+                new_line_list = []
+                for piece in pieces:
+                    piece = piece.strip()
+                    if piece:  # Prevent empty strings from appearing
+
+                        new_line_list.append(int(piece))
+
+                gt[old_line_no] = new_line_list
+
     return gt
+
 
 def load_mapping(path):
     with open(path, "r", encoding="utf-8") as f:
