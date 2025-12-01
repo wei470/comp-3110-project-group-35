@@ -90,17 +90,43 @@ def compare(gt, mp):
     return correct, change, spurious, eliminate
 
 def main():
+    """
+    Traverse samples 1~24 in order:
+    - Read ground truth (pairX.txt)
+    - Read the mapping_X.json we generated
+    - Call compare_mapping to count four situations
+    - Print one line of simple statistical results
+    """
     print("pair, correct%, correct, change, spurious, eliminate")
 
-    for i in range(1, 25):
-        gt = load_gt(f"evaluate_set/pair{i}.txt")
-        mp = load_mapping(f"evaluate_set/mapping_{i}.json")
+    for pair_index in range(1, 25):
+        gt_path = f"evaluate_set/pair{pair_index}.txt"
+        mapping_path = f"evaluate_set/mapping_{pair_index}.json"
 
-        correct, change, spurious, eliminate = compare(gt, mp)
+        #ground truth and output results are both read into dictionaries
+        gt_dict = load_gt(gt_path)
+        mapping_dict = load_mapping(mapping_path)
 
-        total = len(gt)
-        correct_rate = correct / total * 100
+        correct, change, spurious, eliminate = compare_mapping(gt_dict, mapping_dict)
 
-        print(f"{i}, {correct_rate:.2f}%, {correct}, {change}, {spurious}, {eliminate}")
+        total_lines = len(gt_dict)
 
-main()
+       # Prevent division by zero when total_lines is 0
+        if total_lines == 0:
+            correct_rate = 0.0
+        else:
+            correct_rate = correct / total_lines * 100.0
+
+        print(
+            f"{pair_index}, "
+            f"{correct_rate:.2f}%, "
+            f"{correct}, "
+            f"{change}, "
+            f"{spurious}, "
+            f"{eliminate}"
+        )
+
+
+if __name__ == "__main__":
+    main()
+
