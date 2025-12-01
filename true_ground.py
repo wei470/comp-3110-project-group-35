@@ -41,20 +41,33 @@ def generate_gt(old_lines, new_lines):
     return mapping
 
 
-def process_pair(idx):
-    old_f = f"evaluate_set/old_{idx}.txt"
-    new_f = f"evaluate_set/new_{idx}.txt"
+def process_pair(index):  
+"""
+    Process a pair of old_index.txt and new_index.txt files,
+    Call generate_gt to generate the corresponding ground truth,
+    Finally write evaluate_set/pair{index}.txt.
+    """
 
-    old_lines = load_file(old_f)
-    new_lines = load_file(new_f)
+    # Spell out the paths of old and new files
+    old_path = os.path.join("evaluate_set", f"old_{index}.txt")
+    new_path = os.path.join("evaluate_set", f"new_{index}.txt")
 
+    # Read the old file and the new file in line by line.
+    old_lines = load_file(old_path)
+    new_lines = load_file(new_path)
+
+    # Call generate_gt to generate the mapping result (each item is a string of "line number -> ...")
     gt_lines = generate_gt(old_lines, new_lines)
 
-    out_f = f"evaluate_set/pair{idx}.txt"
-    with open(out_f, "w", encoding="utf-8") as f:
-        f.write("\n".join(gt_lines))
+    # Output file path: pair{index}.txt
+    out_path = os.path.join("evaluate_set", f"pair{index}.txt")
 
-    print("Generated:", out_f)
+    with open(out_path, "w", encoding="utf-8") as f:
+        for line in gt_lines:
+            f.write(line + "\n")
+
+    print(f"Generated ground truth file: {out_path}")
+
 
 def main():
     for i in range(1, 25):
