@@ -2,8 +2,17 @@ import os
 os.chdir(os.path.dirname(__file__))   # 保证从 evaluate_set 运行
 
 def load_file(path):
+    lines = []
+
+    # Use with to open the file, so it will automatically close after use
     with open(path, "r", encoding="utf-8") as f:
-        return f.read().splitlines()
+        for line in f:
+            # Remove newlines at the end of each line
+            clean_line = line.rstrip("\n")
+            lines.append(clean_line)
+
+    return lines
+
 
 def generate_gt(old_lines, new_lines):
     mapping = []
