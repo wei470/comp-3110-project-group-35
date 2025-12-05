@@ -32,10 +32,8 @@ def compare(gt, mp):
             correct += 1
         else:
             if out_new and not gt_new:
-                # 本来应该 deleted，你输出了映射
                 spurious += 1
             elif not out_new and gt_new:
-                # 本来应该有映射，你没输出
                 eliminate += 1
             else:
                 change += 1
