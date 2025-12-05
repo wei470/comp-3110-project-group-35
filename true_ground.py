@@ -1,5 +1,5 @@
 import os
-os.chdir(os.path.dirname(__file__))   # 保证从 evaluate_set 运行
+os.chdir(os.path.dirname(__file__))
 
 def load_file(path):
     with open(path, "r", encoding="utf-8") as f:
